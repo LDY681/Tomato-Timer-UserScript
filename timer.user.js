@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Tomato Timer
-// @version      1.0.1
+// @version      1.0.2
 // @description  Customized browser tomato timer
 // @author       https://github.com/LDY681
 // @match        *://*/*
@@ -20,9 +20,6 @@
  * @property pomodoroCounter // counter for Pomodoro technique. count increases with every pomodoro followed by one short break, reset with every 4 pomodoros and starts a long break
  */
 (() => {
-  // TODO for testing
-  // notify();
-
   // Initialize buffer
   initialize();
 
