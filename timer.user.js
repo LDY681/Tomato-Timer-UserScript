@@ -1,12 +1,14 @@
 // ==UserScript==
 // @name         Tomato Timer
-// @version      1.0.0
+// @version      1.0.1
 // @description  Customized browser tomato timer
 // @author       https://github.com/LDY681
 // @match        *://*/*
 // @grant        GM.getValue
 // @grant        GM.setValue
 // @grant        GM_notification
+// @updateURL    https://github.com/LDY681/Tomato-Timer-UserScript/raw/main/timer.user.js
+// @downloadURL  https://github.com/LDY681/Tomato-Timer-UserScript/raw/main/timer.user.js
 // @noframes
 // ==/UserScript==
 
