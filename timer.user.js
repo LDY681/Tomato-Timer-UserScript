@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Tomato Timer
-// @version      1.0.2
+// @version      1.0.3
 // @description  Customized browser tomato timer
 // @author       https://github.com/LDY681
 // @match        *://*/*
@@ -19,7 +19,7 @@
  * @property longBreak // longBreak settings in seconds
  * @property pomodoroCounter // counter for Pomodoro technique. count increases with every pomodoro followed by one short break, reset with every 4 pomodoros and starts a long break
  */
-(() => {
+ (() => {
   // Initialize buffer
   initialize();
 
@@ -66,7 +66,7 @@ async function timer() {
   // Run only in current active tab to avoid concurrency
   if (document.visibilityState != 'hidden') {
     let stage = await GM.getValue('stage'); // get stage we are currently on
-    let gracePeriod = await GM.getValue(stage);  // get grace period for this stage 
+    let gracePeriod = await GM.getValue(stage); // get grace period for this stage
     // If hasn't notified for ${pomodoro} seconds
     let timestamp = await GM.getValue('time');
     let now = currTime();
@@ -84,10 +84,11 @@ function currTime() {
 }
 
 // Notify
-function notify() {
+async function notify() {
+  let stage = await GM.getValue('stage'); // get stage we are currently on
   GM_notification({
-    title: "Tomato Timer",
-    text: "Click to settings",
+    title: "Tomato Timer(Click Me to change settings)",
+    text: "Time for another " + stage + "!",
     image: 'https://img1.baidu.com/it/u=458436129,1300053544&fm=26&fmt=auto&gp=0.jpg',
     timeout: 0, // Don't disappear
     ondone: async function() {
