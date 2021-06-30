@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Tomato Timer
-// @version      1.0.3
+// @version      1.0.4
 // @description  Customized browser tomato timer
 // @author       https://github.com/LDY681
 // @match        *://*/*
@@ -86,36 +86,38 @@ function currTime() {
 // Notify
 async function notify() {
   let stage = await GM.getValue('stage'); // get stage we are currently on
+  let pomodoroCounter = await GM.getValue('pomodoroCounter'); // get pomodoroCounter
+
+  // Update stage and counter to next phase
+  if (stage == 'pomodoro') {
+    // change stage to break
+    if (pomodoroCounter == 3) {
+      // long break
+      stage = 'longBreak';
+      pomodoroCounter = 0;
+    } else {
+      // short break
+      stage = 'shortBreak';
+    }
+  } else {
+    // change stage to pomodoro and update counter
+    stage = 'pomodoro';
+    ++pomodoroCounter;
+  }
+
   GM_notification({
     title: "Tomato Timer(Click Me to change settings)",
     text: "Time for another " + stage + "!",
     image: 'https://img1.baidu.com/it/u=458436129,1300053544&fm=26&fmt=auto&gp=0.jpg',
     timeout: 0, // Don't disappear
     ondone: async function() {
-      // update last timestamp
+      // update phase to next one
       GM.setValue("time", currTime());
-      // change stage to next one
-      let stage = await GM.getValue('stage'); // get stage we are currently on
-      let pomodoroCounter = await GM.getValue('pomodoroCounter');
-      console.log("stage: " + stage + " pomodoroCounter: " + pomodoroCounter);
-      if (stage == 'pomodoro') {
-        // change stage to break
-        if (pomodoroCounter == 3) {
-          // long break
-          GM.setValue("stage",'longBreak');
-          GM.setValue("pomodoroCounter", 0);
-        } else {
-          // short break
-          GM.setValue("stage",'shortBreak');
-        }
-      } else {
-        // change stage to pomodoro and update counter
-        GM.setValue("stage",'pomodoro');
-        GM.setValue("pomodoroCounter", ++pomodoroCounter);
-      }
+      GM.setValue("stage", stage);
+      GM.setValue("pomodoroCounter", pomodoroCounter);
     },
     onclick: function() {
-      var options = prompt("Set Custom Times in the following order: pomodoro + short break + long break.\n Each follows by space(in mins).")
+      var options = prompt("Set Custom Times in the following order: pomodoro + short break + long break.\nEach follows by space(in mins).")
       if (options!=null && options!=""){
         let optionArrs = options.split(" ");
         let pomodoro = optionArrs[0] || 25;
