@@ -85,9 +85,52 @@ function currTime() {
 
 // Notify
 async function notify() {
-  let stage = await GM.getValue('stage'); // get stage we are currently on
-  let pomodoroCounter = await GM.getValue('pomodoroCounter'); // get pomodoroCounter
+  let {stage, pomodoroCounter} = await getNextStage();
+  GM_notification({
+    title: "Tomato Timer(Click Me to change settings)",
+    text: "Time for another " + stage + "!",
+    image: 'https://img1.baidu.com/it/u=458436129,1300053544&fm=26&fmt=auto&gp=0.jpg',
+    timeout: 0, // Don't disappear
+    ondone: async function() {
+      // update phase to next one
+      setTimeout(async ()=>{
+        let {stage, pomodoroCounter} = await getNextStage(); // get stage info again in case it was updated onclick
+        updateStage(stage, pomodoroCounter);
+      }, 1000);
+    },
+    onclick: async function() {
+      var option = prompt("Customize timer: 1.\nSkip to next phase: 2.\nReset timer: 3.")
+      if (option != null && option != ""){
+        if (option == '1') {
+          var settings = prompt("Set Custom Times in the following order: pomodoro + short break + long break.\nEach follows by space(in mins).");
+          if (settings != null && settings != ""){
+            let settingsArrs = settings.split(" ");
+            let pomodoro = settingsArrs[0] || 25;
+            let shortBreak = settingsArrs[1] || 5;
+            let longBreak = settingsArrs[2] || 10;
+            GM.setValue("pomodoro", pomodoro * 60);
+            GM.setValue("shortBreak", shortBreak * 60);
+            GM.setValue("longBreak", longBreak * 60);
+          }
+        } else if (option == '2') {
+          let {stage, pomodoroCounter} = await getNextStage();
+          updateStage(stage, pomodoroCounter)
+        } else if (option == '3') {
+          GM.setValue("pomodoro", 25 * 60);
+          GM.setValue("shortBreak", 5 * 60);
+          GM.setValue("longBreak", 10 * 60);
+          stage = 'pomodoro';
+          pomodoroCounter = 0;
+        }
+      }
+    }
+  });
+}
 
+// Get next stage
+async function getNextStage(Stage, PomodoroCounter) {
+  let stage = Stage || await GM.getValue('stage'); // get stage we are currently on
+  let pomodoroCounter = PomodoroCounter || await GM.getValue('pomodoroCounter'); // get pomodoroCounter
   // Update stage and counter to next phase
   if (stage == 'pomodoro') {
     // change stage to break
@@ -105,29 +148,12 @@ async function notify() {
     ++pomodoroCounter;
   }
 
-  GM_notification({
-    title: "Tomato Timer(Click Me to change settings)",
-    text: "Time for another " + stage + "!",
-    image: 'https://img1.baidu.com/it/u=458436129,1300053544&fm=26&fmt=auto&gp=0.jpg',
-    timeout: 0, // Don't disappear
-    ondone: async function() {
-      // update phase to next one
-      GM.setValue("time", currTime());
-      GM.setValue("stage", stage);
-      GM.setValue("pomodoroCounter", pomodoroCounter);
-    },
-    onclick: function() {
-      var options = prompt("Set Custom Times in the following order: pomodoro + short break + long break.\nEach follows by space(in mins).")
-      if (options!=null && options!=""){
-        let optionArrs = options.split(" ");
-        let pomodoro = optionArrs[0] || 25;
-        let shortBreak = optionArrs[1] || 5;
-        let longBreak = optionArrs[2] || 10;
-        GM.setValue("pomodoro", pomodoro * 60);
-        GM.setValue("shortBreak", shortBreak * 60);
-        GM.setValue("longBreak", longBreak * 60);
-      }
-      GM.setValue("time", currTime());
-    }
-  });
+  return Promise.resolve({stage, pomodoroCounter});
+}
+
+// Update to next stage
+async function updateStage(stage = 'pomodoro', pomodoroCounter = 0) {
+  GM.setValue("time", currTime());
+  GM.setValue("stage", stage);
+  GM.setValue("pomodoroCounter", pomodoroCounter);
 }
